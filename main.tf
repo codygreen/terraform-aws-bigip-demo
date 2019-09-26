@@ -86,7 +86,7 @@ module "ssh_secure_sg" {
 # Create the demo app
 module "nginx-demo-app" {
   source  = "app.terraform.io/f5cloudsa/nginx-demo-app/aws"
-  version = "0.1.0"
+  version = "0.1.1"
 
   prefix = format(
     "%s-%s",
@@ -106,7 +106,7 @@ module "nginx-demo-app" {
 # Create the BIG-IP appliances
 module "bigip" {
   source  = "app.terraform.io/f5cloudsa/bigip/aws"
-  version = "0.1.0"
+  version = "0.1.1"
 
   prefix = format(
     "%s-bigip-1-nic_with_new_vpc-%s",
@@ -115,7 +115,6 @@ module "bigip" {
   )
   f5_instance_count = length(var.azs)
   ec2_key_name      = var.ec2_key_name
-  ec2_private_key   = var.private_key_path
   mgmt_subnet_security_group_ids = [
     module.web_server_sg.this_security_group_id,
     module.web_server_secure_sg.this_security_group_id,
