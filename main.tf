@@ -102,3 +102,25 @@ module "nginx-demo-app" {
   vpc_subnet_ids     = module.vpc.public_subnets
   ec2_instance_count = 4
 }
+
+# Create the BIG-IP appliances
+module "bigip" {
+  source  = "app.terraform.io/f5cloudsa/bigip/aws"
+  version = "0.1.0"
+
+  prefix = format(
+    "%s-bigip-1-nic_with_new_vpc-%s",
+    var.prefix,
+    random_id.id.hex
+  )
+  f5_instance_count = length(var.azs)
+  ec2_key_name      = var.ec2_key_name
+  ec2_private_key   = var.private_key_path
+  mgmt_subnet_security_group_ids = [
+    module.web_server_sg.this_security_group_id,
+    module.web_server_secure_sg.this_security_group_id,
+    module.ssh_secure_sg.this_security_group_id,
+    module.bigip_mgmt_secure_sg.this_security_group_id
+  ]
+  vpc_mgmt_subnet_ids = module.vpc.public_subnets
+}
