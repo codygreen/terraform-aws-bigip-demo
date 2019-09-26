@@ -173,7 +173,7 @@ resource "bigip_as3" "as3-demo1" {
   as3_json = templatefile(
     "${path.module}/as3.tmpl",
     {
-      pool_members = join(",", module.nginx-demo-app.private_ips[0])
+      pool_members = format("\"%s\", \"%s\"", module.nginx-demo-app.private_ips[0][0], module.nginx-demo-app.private_ips[0][2])
     }
   )
   tenant_name = "as3"
@@ -184,7 +184,7 @@ resource "bigip_as3" "as3-demo2" {
   as3_json = templatefile(
     "${path.module}/as3.tmpl",
     {
-      pool_members = join(",", module.nginx-demo-app.private_ips[0])
+      pool_members = format("\"%s\", \"%s\"", module.nginx-demo-app.private_ips[0][1], module.nginx-demo-app.private_ips[0][3])
     }
   )
   tenant_name = "as3"
