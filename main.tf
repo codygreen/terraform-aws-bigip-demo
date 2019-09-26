@@ -1,3 +1,6 @@
+#
+# Set minimum Terraform version and Terraform Cloud backend
+#
 terraform {
   required_version = ">= 0.12"
   backend "remote" {
@@ -9,18 +12,26 @@ terraform {
     }
   }
 }
+
+#
+# Configure AWS provider
+#
 provider "aws" {
   region     = var.region
   access_key = var.AccessKeyID
   secret_key = var.SecretAccessKey
 }
 
+#
 # Create a random id
+#
 resource "random_id" "id" {
   byte_length = 2
 }
 
+#
 # Create the VPC 
+#
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
@@ -43,6 +54,9 @@ module "vpc" {
   }
 }
 
+#
+# Create a security group for port 80 traffic
+#
 module "web_server_sg" {
   source = "terraform-aws-modules/security-group/aws//modules/http-80"
 
@@ -53,6 +67,9 @@ module "web_server_sg" {
   ingress_cidr_blocks = [var.allowed_app_cidr]
 }
 
+#
+# Create a security group for port 443 traffic
+#
 module "web_server_secure_sg" {
   source = "terraform-aws-modules/security-group/aws//modules/https-443"
 
@@ -63,6 +80,9 @@ module "web_server_secure_sg" {
   ingress_cidr_blocks = [var.allowed_app_cidr]
 }
 
+#
+# Create a security group for port 8443 traffic
+#
 module "bigip_mgmt_secure_sg" {
   source = "terraform-aws-modules/security-group/aws//modules/https-8443"
 
@@ -73,6 +93,9 @@ module "bigip_mgmt_secure_sg" {
   ingress_cidr_blocks = [var.allowed_mgmt_cidr]
 }
 
+#
+# Create a security group for SSH traffic
+#
 module "ssh_secure_sg" {
   source = "terraform-aws-modules/security-group/aws//modules/ssh"
 
@@ -83,7 +106,9 @@ module "ssh_secure_sg" {
   ingress_cidr_blocks = [var.allowed_mgmt_cidr]
 }
 
-# Create the demo app
+#
+# Create the demo NGINX app
+#
 module "nginx-demo-app" {
   source  = "app.terraform.io/f5cloudsa/nginx-demo-app/aws"
   version = "0.1.1"
@@ -103,7 +128,9 @@ module "nginx-demo-app" {
   ec2_instance_count = 4
 }
 
+#
 # Create the BIG-IP appliances
+#
 module "bigip" {
   source  = "app.terraform.io/f5cloudsa/bigip/aws"
   version = "0.1.1"
@@ -122,4 +149,32 @@ module "bigip" {
     module.bigip_mgmt_secure_sg.this_security_group_id
   ]
   vpc_mgmt_subnet_ids = module.vpc.public_subnets
+}
+
+#
+# Deploy the demo app on the BIG-IP using AS3
+#
+provider "bigip" {
+  alias    = "bigip1"
+  address  = format("https://%s:%s", module.bigip.mgmt_public_ips[0], module.bigip.mgmt_port)
+  username = "admin"
+  password = module.bigip.password
+}
+
+provider "bigip" {
+  alias    = "bigip2"
+  address  = format("https://%s:%s", module.bigip.mgmt_public_ips[1], module.bigip.mgmt_port)
+  username = "admin"
+  password = module.bigip.password
+}
+
+resource "bigip_as3" "as3-demo1" {
+  provider = bigip.bigip1
+  as3_json = templatefile(
+    "${path.module}/as3.tmpl",
+    {
+      pool_members = module.nginx-demo-app.private_ips[0]
+    }
+  )
+  tenant_name = "as3"
 }
