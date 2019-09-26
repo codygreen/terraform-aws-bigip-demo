@@ -1,3 +1,14 @@
+terraform {
+  required_version = ">= 0.12"
+  backend "remote" {
+    hostname     = "app.terraform.io"
+    organization = "f5cloudsa"
+
+    workspaces {
+      name = "terraform-aws-bigip-demo"
+    }
+  }
+}
 provider "aws" {
   region     = var.region
   access_key = var.AccessKeyID
@@ -70,4 +81,24 @@ module "ssh_secure_sg" {
   vpc_id      = module.vpc.vpc_id
 
   ingress_cidr_blocks = [var.allowed_mgmt_cidr]
+}
+
+# Create the demo app
+module "nginx-demo-app" {
+  source  = "app.terraform.io/f5cloudsa/nginx-demo-app/aws"
+  version = "0.1.0"
+
+  prefix = format(
+    "%s-%s",
+    var.prefix,
+    random_id.id.hex
+  )
+  associate_public_ip_address = true
+  ec2_key_name                = var.ec2_key_name
+  vpc_security_group_ids = [
+    module.web_server_sg.this_security_group_id,
+    module.ssh_secure_sg.this_security_group_id
+  ]
+  vpc_subnet_ids     = module.vpc.public_subnets
+  ec2_instance_count = 4
 }
