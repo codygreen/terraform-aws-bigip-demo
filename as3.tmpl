@@ -29,7 +29,7 @@
             "servicePort": 80,
             "serverAddresses": [
               %{ for addr in pool_members ~}
-                "${addr}"
+                "${addr}",
                 %{ endfor ~}
             ]
           }]
