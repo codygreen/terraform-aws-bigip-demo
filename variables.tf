@@ -29,7 +29,3 @@ variable "allowed_app_cidr" {
 variable "ec2_key_name" {
   default = "cody-key"
 }
-
-variable "private_key_path" {
-  default = "~/.ssh/cody-key.pem"
-}
