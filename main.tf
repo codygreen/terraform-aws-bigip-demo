@@ -3,14 +3,14 @@
 #
 terraform {
   required_version = ">= 0.12"
-  backend "remote" {
-    hostname     = "app.terraform.io"
-    organization = "f5cloudsa"
+  # backend "remote" {
+  #   hostname     = "app.terraform.io"
+  #   organization = "f5cloudsa"
 
-    workspaces {
-      name = "terraform-aws-bigip-demo"
-    }
-  }
+  #   workspaces {
+  #     name = "terraform-aws-bigip-demo"
+  #   }
+  # }
 }
 
 #
@@ -111,7 +111,7 @@ module "ssh_secure_sg" {
 #
 module "nginx-demo-app" {
   source  = "app.terraform.io/f5cloudsa/nginx-demo-app/aws"
-  version = "0.1.1"
+  version = "0.1.2"
 
   prefix = format(
     "%s-%s",
@@ -173,7 +173,7 @@ resource "bigip_as3" "as3-demo1" {
   as3_json = templatefile(
     "${path.module}/as3.tmpl",
     {
-      pool_members = format("\"%s\", \"%s\"", module.nginx-demo-app.private_ips[0][0], module.nginx-demo-app.private_ips[0][2])
+      pool_members = jsonencode(module.nginx-demo-app.private_ips)
     }
   )
   tenant_name = "as3"
@@ -184,7 +184,7 @@ resource "bigip_as3" "as3-demo2" {
   as3_json = templatefile(
     "${path.module}/as3.tmpl",
     {
-      pool_members = format("\"%s\", \"%s\"", module.nginx-demo-app.private_ips[0][1], module.nginx-demo-app.private_ips[0][3])
+      pool_members = jsonencode(module.nginx-demo-app.private_ips)
     }
   )
   tenant_name = "as3"
