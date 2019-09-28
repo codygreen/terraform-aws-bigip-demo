@@ -27,5 +27,5 @@ variable "allowed_app_cidr" {
 }
 
 variable "ec2_key_name" {
-  default = "cody-key"
+  description = "name of AWS EC2 key pair to use for access to provisioned instances"
 }
