@@ -63,7 +63,7 @@ module "bigip_sg" {
   description = "Security group for BIG-IP Demo"
   vpc_id      = module.vpc.vpc_id
 
-  ingress_cidr_blocks = [var.allowed_app_cidr, var.cidr]
+  ingress_cidr_blocks = [var.allowed_app_cidr]
   ingress_rules       = ["http-80-tcp", "https-443-tcp"]
 
   ingress_with_source_security_group_id = [
@@ -88,7 +88,7 @@ module "bigip_mgmt_sg" {
   description = "Security group for BIG-IP Demo"
   vpc_id      = module.vpc.vpc_id
 
-  ingress_cidr_blocks = [var.allowed_app_cidr, var.cidr]
+  ingress_cidr_blocks = [var.allowed_mgmt_cidr]
   ingress_rules       = ["https-443-tcp", "https-8443-tcp", "ssh-tcp"]
 
   ingress_with_source_security_group_id = [
@@ -115,14 +115,6 @@ module "demo_app_sg" {
 
   ingress_cidr_blocks = [var.cidr]
   ingress_rules       = ["all-all"]
-  # ingress_rules       = ["http-80-tcp", "ssh-tcp"]
-
-  # ingress_with_source_security_group_id = [
-  #   {
-  #     rule                     = "all-all"
-  #     source_security_group_id = module.demo_app_sg.this_security_group_id
-  #   }
-  # ]
 
   # Allow ec2 instances outbound Internet connectivity
   egress_cidr_blocks = ["0.0.0.0/0"]

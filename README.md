@@ -20,6 +20,6 @@ This example creates the following resource inside of AWS.  Please ensure your I
 You will need to build the demo out in stages
 ```hcl
 terraform init
-terraform apply -target module.vpc -target module.nginx-demo-app -target module.bigip
+terraform apply -target module.vpc -target module.nginx-demo-app -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg
 teraform apply
 ```
