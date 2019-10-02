@@ -27,5 +27,4 @@ variable "allowed_app_cidr" {
 }
 
 variable "ec2_key_name" {
-  default = "cody-key"
 }

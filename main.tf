@@ -39,6 +39,13 @@ module "vpc" {
     cidrsubnet(var.cidr, 8, num)
   ]
 
+  private_subnets = [
+    for num in range(length(var.azs)) :
+    cidrsubnet(var.cidr, 8, num + 10)
+  ]
+
+  enable_nat_gateway = true
+
   tags = {
     Name        = format("%s-vpc-%s", var.prefix, random_id.id.hex)
     Terraform   = "true"
@@ -46,10 +53,35 @@ module "vpc" {
   }
 }
 
-# #
-# # Create a security group for port 80, 443, 8443 and 22 traffic
-# #
-module "web_service_sg" {
+#
+# Create a security group for BIG-IP
+#
+module "bigip_sg" {
+  source = "terraform-aws-modules/security-group/aws"
+
+  name        = format("%s-bigip-%s", var.prefix, random_id.id.hex)
+  description = "Security group for BIG-IP Demo"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_cidr_blocks = [var.allowed_app_cidr, var.cidr]
+  ingress_rules       = ["http-80-tcp", "https-443-tcp"]
+
+  ingress_with_source_security_group_id = [
+    {
+      rule                     = "all-all"
+      source_security_group_id = module.bigip_sg.this_security_group_id
+    }
+  ]
+
+  # Allow ec2 instances outbound Internet connectivity
+  egress_cidr_blocks = ["0.0.0.0/0"]
+  egress_rules       = ["all-all"]
+}
+
+#
+# Create a security group for BIG-IP Management
+#
+module "bigip_mgmt_sg" {
   source = "terraform-aws-modules/security-group/aws"
 
   name        = format("%s-bigip-mgmt-%s", var.prefix, random_id.id.hex)
@@ -57,15 +89,42 @@ module "web_service_sg" {
   vpc_id      = module.vpc.vpc_id
 
   ingress_cidr_blocks = [var.allowed_app_cidr, var.cidr]
-  ingress_rules       = ["http-80-tcp", "https-443-tcp", "https-8443-tcp", "ssh-tcp"]
+  ingress_rules       = ["https-443-tcp", "https-8443-tcp", "ssh-tcp"]
 
   ingress_with_source_security_group_id = [
     {
       rule                     = "all-all"
-      source_security_group_id = module.web_service_sg.this_security_group_id
+      source_security_group_id = module.bigip_mgmt_sg.this_security_group_id
     }
   ]
 
+  # Allow ec2 instances outbound Internet connectivity
+  egress_cidr_blocks = ["0.0.0.0/0"]
+  egress_rules       = ["all-all"]
+}
+
+#
+# Create a security group for demo app
+#
+module "demo_app_sg" {
+  source = "terraform-aws-modules/security-group/aws"
+
+  name        = format("%s-demo-app-%s", var.prefix, random_id.id.hex)
+  description = "Security group for BIG-IP Demo"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_cidr_blocks = [var.cidr]
+  ingress_rules       = ["all-all"]
+  # ingress_rules       = ["http-80-tcp", "ssh-tcp"]
+
+  # ingress_with_source_security_group_id = [
+  #   {
+  #     rule                     = "all-all"
+  #     source_security_group_id = module.demo_app_sg.this_security_group_id
+  #   }
+  # ]
+
+  # Allow ec2 instances outbound Internet connectivity
   egress_cidr_blocks = ["0.0.0.0/0"]
   egress_rules       = ["all-all"]
 }
@@ -75,7 +134,7 @@ module "web_service_sg" {
 # Create the demo NGINX app
 #
 module "nginx-demo-app" {
-  source  = "app.terraform.io/f5cloudsa/nginx-demo-app/aws"
+  source  = "codygreen/nginx-demo-app/aws"
   version = "0.1.2"
 
   prefix = format(
@@ -86,9 +145,9 @@ module "nginx-demo-app" {
   ec2_key_name = var.ec2_key_name
   # associate_public_ip_address = true
   vpc_security_group_ids = [
-    module.web_service_sg.this_security_group_id
+    module.demo_app_sg.this_security_group_id
   ]
-  vpc_subnet_ids     = module.vpc.public_subnets
+  vpc_subnet_ids     = module.vpc.private_subnets
   ec2_instance_count = 4
 }
 
@@ -96,7 +155,7 @@ module "nginx-demo-app" {
 # Create the BIG-IP appliances
 #
 module "bigip" {
-  source  = "app.terraform.io/f5cloudsa/bigip/aws"
+  source  = "f5devcentral/bigip/aws"
   version = "0.1.1"
 
   prefix = format(
@@ -108,29 +167,8 @@ module "bigip" {
   ec2_key_name      = var.ec2_key_name
   ec2_instance_type = "m4.large"
   mgmt_subnet_security_group_ids = [
-    module.web_service_sg.this_security_group_id
+    module.bigip_sg.this_security_group_id,
+    module.bigip_mgmt_sg.this_security_group_id
   ]
   vpc_mgmt_subnet_ids = module.vpc.public_subnets
-}
-
-
-
-# Create a test box
-#
-module "test-box" {
-  source  = "app.terraform.io/f5cloudsa/nginx-demo-app/aws"
-  version = "0.1.2"
-
-  prefix = format(
-    "%s-%s",
-    "test-box",
-    random_id.id.hex
-  )
-  ec2_key_name                = var.ec2_key_name
-  associate_public_ip_address = true
-  vpc_security_group_ids = [
-    module.web_service_sg.this_security_group_id
-  ]
-  vpc_subnet_ids     = module.vpc.public_subnets
-  ec2_instance_count = 2
 }
