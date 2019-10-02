@@ -9,3 +9,7 @@ output "bigip_mgmt_port" {
 output "bigip_password" {
   value = module.bigip.password
 }
+
+output "nginx_ips" {
+  value = module.nginx-demo-app.private_ips
+}

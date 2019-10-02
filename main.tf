@@ -54,57 +54,30 @@ module "vpc" {
   }
 }
 
-#
-# Create a security group for port 80 traffic
-#
-module "web_server_sg" {
-  source = "terraform-aws-modules/security-group/aws//modules/http-80"
-
-  name        = format("%s-web-server-%s", var.prefix, random_id.id.hex)
-  description = "Security group for web-server with HTTP ports"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress_cidr_blocks = [var.allowed_app_cidr]
-}
-
-#
-# Create a security group for port 443 traffic
-#
-module "web_server_secure_sg" {
-  source = "terraform-aws-modules/security-group/aws//modules/https-443"
-
-  name        = format("%s-web-server-secure-%s", var.prefix, random_id.id.hex)
-  description = "Security group for web-server with HTTPS ports"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress_cidr_blocks = [var.allowed_app_cidr]
-}
-
-#
-# Create a security group for port 8443 traffic
-#
-module "bigip_mgmt_secure_sg" {
-  source = "terraform-aws-modules/security-group/aws//modules/https-8443"
+# #
+# # Create a security group for port 80, 443, 8443 and 22 traffic
+# #
+module "web_service_sg" {
+  source = "terraform-aws-modules/security-group/aws"
 
   name        = format("%s-bigip-mgmt-%s", var.prefix, random_id.id.hex)
-  description = "Security group for BIG-IP MGMT Interface"
+  description = "Security group for BIG-IP Demo"
   vpc_id      = module.vpc.vpc_id
 
-  ingress_cidr_blocks = [var.allowed_mgmt_cidr]
+  ingress_cidr_blocks = [var.allowed_app_cidr, var.cidr]
+  ingress_rules       = ["http-80-tcp", "https-443-tcp", "https-8443-tcp", "ssh-tcp"]
+
+  ingress_with_source_security_group_id = [
+    {
+      rule                     = "all-all"
+      source_security_group_id = module.web_service_sg.this_security_group_id
+    }
+  ]
+
+  egress_cidr_blocks = ["0.0.0.0/0"]
+  egress_rules       = ["all-all"]
 }
 
-#
-# Create a security group for SSH traffic
-#
-module "ssh_secure_sg" {
-  source = "terraform-aws-modules/security-group/aws//modules/ssh"
-
-  name        = format("%s-ssh-%s", var.prefix, random_id.id.hex)
-  description = "Security group for SSH ports open within VPC"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress_cidr_blocks = [var.allowed_mgmt_cidr]
-}
 
 #
 # Create the demo NGINX app
@@ -119,9 +92,9 @@ module "nginx-demo-app" {
     random_id.id.hex
   )
   ec2_key_name = var.ec2_key_name
+  # associate_public_ip_address = true
   vpc_security_group_ids = [
-    module.web_server_sg.this_security_group_id,
-    module.ssh_secure_sg.this_security_group_id
+    module.web_service_sg.this_security_group_id
   ]
   vpc_subnet_ids     = module.vpc.public_subnets
   ec2_instance_count = 4
@@ -141,11 +114,31 @@ module "bigip" {
   )
   f5_instance_count = length(var.azs)
   ec2_key_name      = var.ec2_key_name
+  ec2_instance_type = "m4.large"
   mgmt_subnet_security_group_ids = [
-    module.web_server_sg.this_security_group_id,
-    module.web_server_secure_sg.this_security_group_id,
-    module.ssh_secure_sg.this_security_group_id,
-    module.bigip_mgmt_secure_sg.this_security_group_id
+    module.web_service_sg.this_security_group_id
   ]
   vpc_mgmt_subnet_ids = module.vpc.public_subnets
+}
+
+
+
+# Create a test box
+#
+module "test-box" {
+  source  = "app.terraform.io/f5cloudsa/nginx-demo-app/aws"
+  version = "0.1.2"
+
+  prefix = format(
+    "%s-%s",
+    "test-box",
+    random_id.id.hex
+  )
+  ec2_key_name                = var.ec2_key_name
+  associate_public_ip_address = true
+  vpc_security_group_ids = [
+    module.web_service_sg.this_security_group_id
+  ]
+  vpc_subnet_ids     = module.vpc.public_subnets
+  ec2_instance_count = 2
 }

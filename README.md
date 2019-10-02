@@ -9,3 +9,4 @@ You will need to build the demo out in stages
 ```hcl
 terraform init
 terraform apply -target module.vpc -target module.nginx-demo-app -target module.bigip
+teraform apply
