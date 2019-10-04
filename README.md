@@ -7,7 +7,7 @@ https://www.terraform.io/docs/commands/cli-config.html
 # Required Resource
 This example creates the following resource inside of AWS.  Please ensure your IAM user or IAM Role has privileges to create these objects.
 
-**Note:** This example requires 3 Elastic IPs, please ensure you EIP limit on your account can accommodate this (information on ElasticIP limits can be found at https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html#limits_ec2)
+**Note:** This example requires 3 Elastic IPs, please ensure your EIP limit on your account can accommodate this (information on ElasticIP limits can be found at https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html#limits_ec2)
  - AWS VPC
  - AWS Route Tables
  - AWS Nat Gateways
