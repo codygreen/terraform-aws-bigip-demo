@@ -15,6 +15,16 @@ This example creates the following resource inside of AWS.  Please ensure your I
  - AWS EC2 Instances
  - AWS Subnets
  - AWS Security Groups
+ 
+ **Note:** In order to use this demo your AWS account must be subscribed to the F5 AMI and its associated terms and conditions. If your account is not subscribed, the first time ```terraform apply``` is run you will receive an error similar to the following:
+
+```
+ Error: Error launching source instance: OptInRequired: In order to use this AWS Marketplace product you need to accept terms and subscribe. To do so please 
+visit https://aws.amazon.com/marketplace/pp?sku=XXXXXXXXXXXXXXXXXXXXXXXX
+```
+The url embedded within the error message will load the appropriate location in order to subscribe the AWS account to the F5 AMI.
+
+After subscribing, run the ```terraform apply``` again and the error should not occur again.
 
 # Setup
 You will need to build the demo out in stages
