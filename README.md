@@ -38,6 +38,5 @@ When you are done using the demo environment you will need to decommission in st
 ```hcl
 terraform destroy -target bigip_as3.as3-demo1 -target bigip_as3.as3-demo2
 terraform destroy -target module.nginx-demo-app
-terraform apply -target module.vpc -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg
+terraform destroy -target module.vpc -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg
 ```
-terraform destroy -target bigip_as3.as3-demo1 -target bigip_as3.as3-demo2
