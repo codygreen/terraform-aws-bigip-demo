@@ -176,12 +176,13 @@ module "bigip" {
     var.prefix,
     random_id.id.hex
   )
-  f5_instance_count = length(var.azs)
-  ec2_key_name      = var.ec2_key_name
-  ec2_instance_type = "m4.large"
-  mgmt_subnet_security_group_ids = [
+  aws_secretmanager_secret_id     = aws_secretsmanager_secret.bigip.id
+  f5_instance_count               = length(var.azs)
+  ec2_key_name                    = var.ec2_key_name
+  ec2_instance_type               = "m4.large"
+  mgmt_subnet_security_group_ids  = [
     module.bigip_sg.this_security_group_id,
     module.bigip_mgmt_sg.this_security_group_id
   ]
-  vpc_mgmt_subnet_ids = module.vpc.public_subnets
+  vpc_mgmt_subnet_ids             = module.vpc.public_subnets
 }
