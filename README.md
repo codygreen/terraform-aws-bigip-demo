@@ -30,6 +30,14 @@ After subscribing, re-run the ```terraform apply``` and the error should not occ
 You will need to build the demo out in stages
 ```hcl
 terraform init
-terraform apply -target module.vpc -target module.nginx-demo-app -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg
+terraform apply -target module.vpc -target module.nginx-demo-app -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg -target aws_secretsmanager_secret_version.bigip-pwd
 terraform apply
+```
+
+# Teardown
+When you are done using the demo environment you will need to decommission in stages
+```hcl
+terraform destroy -target bigip_as3.as3-demo1 -target bigip_as3.as3-demo2
+terraform destroy -target module.nginx-demo-app
+terraform destroy -target module.vpc -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg -target aws_secretsmanager_secret_version.bigip-pwd
 ```
