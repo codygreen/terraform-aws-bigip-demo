@@ -45,3 +45,8 @@ terraform destroy -target bigip_as3.as3-demo1 -target bigip_as3.as3-demo2
 terraform destroy -target module.nginx-demo-app
 terraform destroy -target module.vpc -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg -target aws_secretsmanager_secret_version.bigip-pwd
 ```
+
+# Creating Load
+```
+locust --host=http://<bigip host>
+```
