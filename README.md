@@ -29,24 +29,56 @@ After subscribing, re-run the ```terraform apply``` and the error should not occ
 # Setup
 You will need to build the demo out in stages. 
 ```hcl
+# initialize Terraform
 terraform init
+# build the NGINX nodes, the BIG-IPS, and the underpinning infrastructure
 terraform apply -target module.vpc -target module.nginx-demo-app -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg -target aws_secretsmanager_secret_version.bigip-pwd
 ```
 In between the intial commands and the final command,  you will need to wait as the BIG-IPs complete configuration. Once you are able to log into the BIG-IPs using the generated password you can proceed to the next command.
+
+```
+# check the status of the BIG-IPs
+terraform output --json > inspec/bigip-ready/files/terraform.json
+inspec exec inspec/bigip-ready
+```
+
 ```hcl
 terraform apply
 ```
+If terraform returns an error, rerun ```terraform apply```.
 
+# log into the BIG-IP
+```
+# find the connection info for the BIG-IP
+terraform output --json | jq '.bigip_mgmt_public_ips'
+terraform output --json | jq '.bigip_mgmt_port'
+terraform output --json | jq '.bigip_password'
+```
+connect to the BIGIP at https://<bigip_mgmt_public_ips>:<bigip_mgmt_port>
+login as user:admin and password: <bigip_password>
+
+# view the NGINX web application
+connect to the web application at http://<bigip_mgmt_public_ips>
+
+# Creating Load
+```
+# find the ip address of the created BIG-IP 
+export BIGIPHOST0=`terraform output --json | jq '.bigip_mgmt_public_ips.value[0]' | sed 's/"//g'`
+# start the locust instance 
+cd locust
+locust --host=http://$BIGIPHOST0
+```
+Go to the url created by locust to use the load generation gui.
+Press ctrl-C when you are done with the load generation.
 
 # Teardown
 When you are done using the demo environment you will need to decommission in stages
 ```hcl
+# remove the as3 configured partition
 terraform destroy -target bigip_as3.as3-demo1 -target bigip_as3.as3-demo2
+# remove the nginx demo application nodes
 terraform destroy -target module.nginx-demo-app
+# remove the BIG-IP and the underpinning infrastructure
 terraform destroy -target module.vpc -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg -target aws_secretsmanager_secret_version.bigip-pwd
 ```
 
-# Creating Load
-```
-locust --host=http://<bigip host>
-```
