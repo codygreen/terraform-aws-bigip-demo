@@ -4,6 +4,8 @@ Demo deployment of F5 BIG-IP in AWS using Terraform
 an authentication token must be generated and recorded as documented below in order to access the modules required by this demo
 https://www.terraform.io/docs/commands/cli-config.html
 
+You can choose to run this from your workstation or a container. Follow the instructions below as appropriate;
+
 # Using your workstation
 - install Terraform https://learn.hashicorp.com/terraform/getting-started/install.html
 - install inpsec https://www.inspec.io/downloads/
