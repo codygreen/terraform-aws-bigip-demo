@@ -5,14 +5,14 @@ provider "bigip" {
   alias    = "bigip1"
   address  = format("https://%s:%s", module.bigip.mgmt_public_ips[0], module.bigip.mgmt_port)
   username = "admin"
-  password = module.bigip.password
+  password = random_password.password.result
 }
 
 provider "bigip" {
   alias    = "bigip2"
   address  = format("https://%s:%s", module.bigip.mgmt_public_ips[1], module.bigip.mgmt_port)
   username = "admin"
-  password = module.bigip.password
+  password = random_password.password.result
 }
 
 resource "bigip_as3" "as3-demo1" {

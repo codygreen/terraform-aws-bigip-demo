@@ -144,23 +144,45 @@ module "nginx-demo-app" {
 }
 
 #
+# Create random password for BIG-IP
+#
+resource "random_password" "password" {
+  length           = 16
+  special          = true
+  override_special = "_%@"
+}
+
+#
+# Create Secret Store and Store BIG-IP Password
+#
+resource "aws_secretsmanager_secret" "bigip" {
+  name = format("%s-bigip-secret-%s", var.prefix, random_id.id.hex)
+}
+resource "aws_secretsmanager_secret_version" "bigip-pwd" {
+  secret_id     = aws_secretsmanager_secret.bigip.id
+  secret_string = random_password.password.result
+}
+
+
+#
 # Create the BIG-IP appliances
 #
 module "bigip" {
   source  = "f5devcentral/bigip/aws"
-  version = "0.1.1"
+  version = "0.1.2"
 
   prefix = format(
     "%s-bigip-1-nic_with_new_vpc-%s",
     var.prefix,
     random_id.id.hex
   )
-  f5_instance_count = length(var.azs)
-  ec2_key_name      = var.ec2_key_name
-  ec2_instance_type = "m4.large"
-  mgmt_subnet_security_group_ids = [
+  aws_secretmanager_secret_id     = aws_secretsmanager_secret.bigip.id
+  f5_instance_count               = length(var.azs)
+  ec2_key_name                    = var.ec2_key_name
+  ec2_instance_type               = "m4.large"
+  mgmt_subnet_security_group_ids  = [
     module.bigip_sg.this_security_group_id,
     module.bigip_mgmt_sg.this_security_group_id
   ]
-  vpc_mgmt_subnet_ids = module.vpc.public_subnets
+  vpc_mgmt_subnet_ids             = module.vpc.public_subnets
 }

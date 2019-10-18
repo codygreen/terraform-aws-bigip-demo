@@ -15,7 +15,7 @@ output "bigip_mgmt_port" {
 
 output "bigip_password" {
   description = "BIG-IP management password"
-  value       = module.bigip.password
+  value       = random_password.password.result
 }
 
 output "nginx_ips" {
