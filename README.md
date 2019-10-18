@@ -4,6 +4,16 @@ Demo deployment of F5 BIG-IP in AWS using Terraform
 an authentication token must be generated and recorded as documented below in order to access the modules required by this demo
 https://www.terraform.io/docs/commands/cli-config.html
 
+# Using your workstation
+- install Terraform https://learn.hashicorp.com/terraform/getting-started/install.html
+- install inpsec https://www.inspec.io/downloads/
+- install locust https://docs.locust.io/en/stable/installation.html
+- install jq https://stedolan.github.io/jq/download/
+
+# Using a Docker container
+- install Docker Desktop (https://www.docker.com/products/docker-desktop)
+- docker run -it mmenger/tfdemoenv:1.0 /bin/sh
+
 # Required Resource
 This example creates the following resource inside of AWS.  Please ensure your IAM user or IAM Role has privileges to create these objects.
 
@@ -25,6 +35,7 @@ visit https://aws.amazon.com/marketplace/pp?sku=XXXXXXXXXXXXXXXXXXXXXXXX
 The url embedded within the error message will load the appropriate location in order to subscribe the AWS account to the F5 AMI.
 
 After subscribing, re-run the ```terraform apply``` and the error should not occur again.
+
 
 # Setup
 You will need to build the demo out in stages. 
