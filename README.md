@@ -14,7 +14,7 @@ You can choose to run this from your workstation or a container. Follow the inst
 
 # Using a Docker container
 - install Docker Desktop (https://www.docker.com/products/docker-desktop)
-- docker run -it mmenger/tfdemoenv:1.0 /bin/sh
+- docker run -it mmenger/tfdemoenv:1.1 /bin/sh
 
 # Required Resource
 This example creates the following resource inside of AWS.  Please ensure your IAM user or IAM Role has privileges to create these objects.
@@ -38,6 +38,19 @@ The url embedded within the error message will load the appropriate location in 
 
 After subscribing, re-run the ```terraform apply``` and the error should not occur again.
 
+# Access Credentials
+```bash
+#starting from the directory where you cloned this repository
+cd terraform-aws-bigip-demo
+vi secrets.auto.tfvars
+```
+enter the following in the *secrets.auto.tfvars* file
+```hcl
+AccessKeyID         = "<AN ACCESS KEY FOR YOUR AWS ACCOUNT>" 
+SecretAccessKey     = "<THE SECRET KEY ASSOCIATED WITH THE AWS ACCESS KEY>" 
+ec2_key_name        = "<THE NAME OF AN AWS KEY PAIR WHICH IS ASSOCIATE WITH THE AWS ACOUNT>"
+```
+save the file and quit vi
 
 # Setup
 You will need to build the demo out in stages. 
