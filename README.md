@@ -37,8 +37,8 @@ In between the intial commands and the final command,  you will need to wait as 
 terraform apply
 ```
 
-
 # Teardown
+=======
 When you are done using the demo environment you will need to decommission in stages
 ```hcl
 terraform destroy -target bigip_as3.as3-demo1 -target bigip_as3.as3-demo2
