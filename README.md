@@ -13,8 +13,9 @@ You can choose to run this from your workstation or a container. Follow the inst
 - install jq https://stedolan.github.io/jq/download/
 
 # Using a Docker container
+The 8089 port is opened in order to use the gui of the load generating tool
 - install Docker Desktop (https://www.docker.com/products/docker-desktop)
-- docker run -it mmenger/tfdemoenv:1.1 /bin/sh
+- docker run -it -p 8089:8089 mmenger/tfdemoenv:1.5.2 /bin/sh
 
 # Required Resource
 This example creates the following resource inside of AWS.  Please ensure your IAM user or IAM Role has privileges to create these objects.
@@ -76,9 +77,10 @@ If terraform returns an error, rerun ```terraform apply```.
 # log into the BIG-IP
 ```
 # find the connection info for the BIG-IP
-terraform output --json | jq '.bigip_mgmt_public_ips'
-terraform output --json | jq '.bigip_mgmt_port'
-terraform output --json | jq '.bigip_password'
+export BIGIPHOST0=`terraform output --json | jq '.bigip_mgmt_public_ips.value[0]' | sed 's/"//g'`
+export BIGIPMGMTPORT=`terraform output --json | jq '.bigip_mgmt_port.value' | sed 's/"//g'`
+export BIGIPPASSWORD=`terraform output --json | jq '.bigip_password.value' | sed 's/"//g'`
+echo connect at https://$BIGIPHOST0:$BIGIPMGMTPORT
 ```
 connect to the BIGIP at https://<bigip_mgmt_public_ips>:<bigip_mgmt_port>
 login as user:admin and password: <bigip_password>
