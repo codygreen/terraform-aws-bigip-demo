@@ -18,7 +18,3 @@ output "bigip_password" {
   value       = random_password.password.result
 }
 
-output "nginx_ips" {
-  description = "Internal IP addresses of the demo app servers"
-  value       = module.nginx-demo-app.private_ips
-}
