@@ -99,6 +99,8 @@ locust --host=http://$BIGIPHOST0
 Go to the url created by locust to use the load generation gui.
 Press ctrl-C when you are done with the load generation.
 
+
+
 # Teardown
 When you are done using the demo environment you will need to decommission in stages
 ```hcl
