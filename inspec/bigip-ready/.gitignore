@@ -1,0 +1,4 @@
+inspec.lock
+
+# temporary file used to hold terraform output information
+terraform.json
