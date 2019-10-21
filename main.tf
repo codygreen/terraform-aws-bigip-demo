@@ -106,6 +106,27 @@ module "bigip_mgmt_sg" {
 
 
 #
+# Create the demo NGINX app
+#
+module "nginx-demo-app" {
+  source  = "github.com/mjmenger/juiceshopmodule"
+  #version = "0.1.2"
+
+  prefix = format(
+    "%s-%s",
+    var.prefix,
+    random_id.id.hex
+  )
+  ec2_key_name = var.ec2_key_name
+  # associate_public_ip_address = true
+  vpc_security_group_ids = [
+    module.demo_app_sg.this_security_group_id
+  ]
+  vpc_subnet_ids     = module.vpc.private_subnets
+  ec2_instance_count = 4
+}
+
+#
 # Create random password for BIG-IP
 #
 resource "random_password" "password" {
