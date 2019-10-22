@@ -89,6 +89,17 @@ echo ssh -i "tfdemo.pem" ubuntu@$JUMPHOSTIP
 connect to the BIGIP at https://<bigip_mgmt_public_ips>:<bigip_mgmt_port>
 login as user:admin and password: <bigip_password>
 
+# Creating Load
+```
+# find the ip address of the created BIG-IP 
+export BIGIPHOST0=`terraform output --json | jq '.bigip_mgmt_public_ips.value[0]' | sed 's/"//g'`
+# start the locust instance 
+cd locust
+locust --host=http://$BIGIPHOST0
+```
+Go to the url created by locust to use the load generation gui.
+Press ctrl-C when you are done with the load generation.
+
 # Teardown
 When you are done using the demo environment you will need to decommission in stages
 ```hcl
