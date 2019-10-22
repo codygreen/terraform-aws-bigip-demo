@@ -67,6 +67,11 @@ In between the intial commands and the final command,  you will need to wait as 
 terraform output --json > inspec/bigip-ready/files/terraform.json
 inspec exec inspec/bigip-ready
 ```
+once the tests all pass the BIG-IP is ready for the final build step
+```
+terraform apply
+```
+
 
 If terraform returns an error, rerun ```terraform apply```.
 
