@@ -18,3 +18,12 @@ output "bigip_password" {
   value       = random_password.password.result
 }
 
+output "nginx_ips" {
+  description = "Internal IP addresses of the demo app servers"
+  value       = module.nginx-demo-app.private_ips
+}
+
+output "jumphost_ip" {
+  description = "ip address of jump host"
+  value       = module.jumphost.public_ip
+}
