@@ -51,8 +51,8 @@ resource "null_resource" "transfer" {
             bigip_domain           = "${var.region}.compute.internal"
             bigip_username         = "admin"
             bigip_password         = random_password.password.result
-            bigip_external_self_ip = "10.1.10.241/24"
-            bigip_internal_self_ip = "10.1.20.241/24"
+            bigip_external_self_ip = module.bigip.mgmt_public_ips[0]
+            bigip_internal_self_ip = module.bigip.mgmt_public_ips[0]
             appserver_virtual_ip   = module.nginx-demo-app.private_ips[0]
             appserver_host_ip      = module.nginx-demo-app.private_ips[0]
           }
