@@ -87,6 +87,10 @@ login as user:admin and password: <bigip_password>
 # Teardown
 When you are done using the demo environment you will need to decommission in stages
 ```hcl
+# remove the as3 configured partition
+terraform destroy -target bigip_as3.as3-demo1 -target bigip_as3.as3-demo2
+# remove the nginx demo application nodes
+terraform destroy -target module.nginx-demo-app
 # remove the BIG-IP and the underpinning infrastructure
 terraform destroy -target module.jumphost -target module.vpc -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg -target aws_secretsmanager_secret_version.bigip-pwd
 terraform destroy -target aws_secretsmanager_secret.bigip -target random_password.password -target random_id.id -target data.aws_ami.latest-ubuntu
