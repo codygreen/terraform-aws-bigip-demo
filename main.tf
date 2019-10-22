@@ -103,7 +103,23 @@ module "bigip_mgmt_sg" {
   egress_rules       = ["all-all"]
 }
 
+#
+# Create a security group for demo app
+#
+module "demo_app_sg" {
+  source = "terraform-aws-modules/security-group/aws"
 
+  name        = format("%s-demo-app-%s", var.prefix, random_id.id.hex)
+  description = "Security group for BIG-IP Demo"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_cidr_blocks = [var.cidr]
+  ingress_rules       = ["all-all"]
+
+  # Allow ec2 instances outbound Internet connectivity
+  egress_cidr_blocks = ["0.0.0.0/0"]
+  egress_rules       = ["all-all"]
+}
 
 #
 # Create the demo NGINX app

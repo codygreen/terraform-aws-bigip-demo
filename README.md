@@ -58,15 +58,7 @@ save the file and quit vi
 # initialize Terraform
 terraform init
 # build the NGINX nodes, the BIG-IPS, and the underpinning infrastructure
-<<<<<<< HEAD
-<<<<<<< HEAD
-terraform apply
-=======
 terraform apply -target module.jumphost -target module.vpc -target module.nginx-demo-app -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg -target aws_secretsmanager_secret_version.bigip-pwd
->>>>>>> update terraform apply and destroy instructions
-=======
-terraform apply -target module.jumphost -target module.vpc -target module.nginx-demo-app -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg -target aws_secretsmanager_secret_version.bigip-pwd -target null_resource.transfer
->>>>>>> jumphost apply/destroy notes
 ```
 In between the intial commands and the final command,  you will need to wait as the BIG-IPs complete configuration. Once you are able to log into the BIG-IPs using the generated password you can proceed to the next command.
 
@@ -96,20 +88,8 @@ login as user:admin and password: <bigip_password>
 When you are done using the demo environment you will need to decommission in stages
 ```hcl
 # remove the BIG-IP and the underpinning infrastructure
-<<<<<<< HEAD
-<<<<<<< HEAD
-terraform destroy 
-=======
 terraform destroy -target module.jumphost -target module.vpc -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg -target aws_secretsmanager_secret_version.bigip-pwd
-<<<<<<< HEAD
 terraform destroy -target aws_secretsmanager_secret.bigip -target random_password.password -target random_id.id -target data.aws_ami.latest-ubuntu
->>>>>>> update terraform apply and destroy instructions
-=======
-terraform destroy -target aws_secretsmanager_secret.bigip -target random_password.password -target random_id.id -target data.aws_ami.latest-ubuntu -target null_resource.transfer
->>>>>>> jumphost apply/destroy notes
-=======
-terraform destroy -target module.jumphost -target module.vpc -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg -target aws_secretsmanager_secret_version.bigip-pwd -target aws_secretsmanager_secret.bigip -target random_password.password -target random_id.id -target data.aws_ami.latest-ubuntu -target null_resource.transfer
->>>>>>> fix apply instructions
 ```
 
 as a final step check that terraform doesn't think there's anything remaining
