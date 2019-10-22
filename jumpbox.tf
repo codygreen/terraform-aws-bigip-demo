@@ -53,8 +53,8 @@ resource "null_resource" "transfer" {
             bigip_password         = random_password.password.result
             bigip_external_self_ip = module.bigip.mgmt_public_ips[0]
             bigip_internal_self_ip = module.bigip.mgmt_public_ips[0]
-            appserver_virtual_ip   = module.nginx-demo-app.private_ips[0]
-            appserver_host_ip      = module.nginx-demo-app.private_ips[0]
+            appserver_virtual_ip   = "this.is.a.dummy.var"
+            appserver_host_ip      = "this.is.a.dummy.var"
           }
     )
 
