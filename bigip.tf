@@ -35,13 +35,30 @@ module "bigip" {
   aws_secretmanager_secret_id     = aws_secretsmanager_secret.bigip.id
   f5_instance_count               = length(var.azs)
   ec2_key_name                    = var.ec2_key_name
-  ec2_instance_type               = "m4.large"
+  ec2_instance_type               = "m5.large"
+  
   mgmt_subnet_security_group_ids  = [
     module.bigip_sg.this_security_group_id,
     module.bigip_mgmt_sg.this_security_group_id
   ]
-  vpc_mgmt_subnet_ids             = module.vpc.public_subnets
-}
+
+
+  public_subnet_security_group_ids = [
+    module.bigip_sg.this_security_group_id,
+    module.bigip_mgmt_sg.this_security_group_id
+  ]
+
+  private_subnet_security_group_ids = [
+    module.bigip_sg.this_security_group_id,
+    module.bigip_mgmt_sg.this_security_group_id
+  ]
+
+
+
+  vpc_public_subnet_ids  = module.vpc.public_subnets
+  vpc_private_subnet_ids = module.vpc.private_subnets
+  vpc_mgmt_subnet_ids    = module.vpc.database_subnets
+  }
 
 
 #
@@ -92,4 +109,9 @@ module "bigip_mgmt_sg" {
   # Allow ec2 instances outbound Internet connectivity
   egress_cidr_blocks = ["0.0.0.0/0"]
   egress_rules       = ["all-all"]
+}
+
+data "aws_network_interface" "bar" {
+  count = length(module.bigip.public_nic_ids)
+  id = module.bigip.public_nic_ids[count.index]
 }

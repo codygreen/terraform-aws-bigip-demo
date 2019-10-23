@@ -11,14 +11,22 @@ module "vpc" {
 
   azs = var.azs
 
-  public_subnets = [
-    for num in range(length(var.azs)) :
-    cidrsubnet(var.cidr, 8, num)
+  public_subnets = [for num in range(length(var.azs)) :
+      cidrsubnet(var.cidr, 8, num)
   ]
+  
+  # using the database subnet method since it allows a public route
+  database_subnets = [
+    for num in range(length(var.azs)) :
+    cidrsubnet(var.cidr, 8, num + 10)
+  ]
+  create_database_subnet_group           = true
+  create_database_subnet_route_table     = true
+  create_database_internet_gateway_route = true
 
   private_subnets = [
     for num in range(length(var.azs)) :
-    cidrsubnet(var.cidr, 8, num + 10)
+    cidrsubnet(var.cidr, 8, num + 20)
   ]
 
   enable_nat_gateway = true
