@@ -15,7 +15,7 @@ You can choose to run this from your workstation or a container. Follow the inst
 # Using a Docker container
 The 8089 port is opened in order to use the gui of the load generating tool
 - install Docker Desktop (https://www.docker.com/products/docker-desktop)
-- docker run -it -v $(pwd):/workspace -p 8089:8089 mmenger/tfdemoenv:1.5.4 /bin/bash
+- docker run -it -v $(pwd):/workspace -p 8089:8089 mmenger/tfdemoenv:1.5.5 /bin/bash
 
 # Required Resource
 This example creates the following resource inside of AWS.  Please ensure your IAM user or IAM Role has privileges to create these objects.
@@ -58,20 +58,16 @@ save the file and quit vi
 # initialize Terraform
 terraform init
 # build the NGINX nodes, the BIG-IPS, and the underpinning infrastructure
-terraform apply -target module.jumphost -target module.vpc -target module.nginx-demo-app -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg -target aws_secretsmanager_secret_version.bigip-pwd
+terraform apply 
 ```
-In between the intial commands and the final command,  you will need to wait as the BIG-IPs complete configuration. Once you are able to log into the BIG-IPs using the generated password you can proceed to the next command.
+Before proceeding you will need to wait as the BIG-IPs complete configuration. Once you are able to log into the BIG-IPs using the generated password you can proceed to the next command. The following Inspec tests validate the connectivity of the BIG-IP and the availability of the management API end point.
 
 ```
 # check the status of the BIG-IPs
 terraform output --json > inspec/bigip-ready/files/terraform.json
 inspec exec inspec/bigip-ready
 ```
-once the tests all pass the BIG-IP is ready for the final build step
-```
-terraform apply
-```
-
+once the tests all pass the BIG-IP is ready
 
 If terraform returns an error, rerun ```terraform apply```.
 
@@ -101,15 +97,9 @@ Go to the url created by locust to use the load generation gui.
 Press ctrl-C when you are done with the load generation.
 
 # Teardown
-When you are done using the demo environment you will need to decommission in stages
+When you are done using the demo environment you will need to decommission it
 ```hcl
-# remove the as3 configured partition
-terraform destroy -target bigip_as3.as3-demo1 -target bigip_as3.as3-demo2
-# remove the nginx demo application nodes
-terraform destroy -target module.nginx-demo-app
-# remove the BIG-IP and the underpinning infrastructure
-terraform destroy -target module.jumphost -target module.vpc -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg -target aws_secretsmanager_secret_version.bigip-pwd
-terraform destroy -target aws_secretsmanager_secret.bigip -target random_password.password -target random_id.id -target data.aws_ami.latest-ubuntu
+terraform destroy
 ```
 
 as a final step check that terraform doesn't think there's anything remaining
