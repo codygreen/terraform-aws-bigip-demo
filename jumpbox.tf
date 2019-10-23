@@ -46,19 +46,19 @@ resource "null_resource" "transfer" {
     content     = templatefile(
       "${path.module}/hostvars_template.yml",
           {
-            bigip_host_ip          = module.bigip.mgmt_public_ips[0]
-            bigip_host_dns         = module.bigip.mgmt_public_dns[0]
+            bigip_host_ip          = module.bigip.mgmt_public_ips[0] # the ip address that the bigip has on the management subnet
+            bigip_host_dns         = module.bigip.mgmt_public_dns[0] # the DNS name of the bigip on the public subnet
             bigip_domain           = "${var.region}.compute.internal"
             bigip_username         = "admin"
             bigip_password         = random_password.password.result
-            bigip_external_self_ip = module.bigip.mgmt_public_ips[0]
-            bigip_internal_self_ip = module.bigip.mgmt_public_ips[0]
-            appserver_virtual_ip   = "this.is.a.dummy.var"
-            appserver_host_ip      = "this.is.a.dummy.var"
+            bigip_external_self_ip = data.aws_network_interface.bar[0].private_ip # the ip address that the bigip has on the public subnet
+            bigip_internal_self_ip = module.bigip.mgmt_public_ips[0] # the ip address that the bigip has on the private subnet
+            appserver_virtual_ip   = cidrhost(cidrsubnet(var.cidr,8,0),125)
+            appserver_host_ip      = module.jumphost.private_ip[0]   # the ip address that the jumphost has on the public subnet
           }
     )
 
-    destination = "~/hostvars.yml"
+    destination = "~/inventory.yml"
 
     connection {
       type        = "ssh"
