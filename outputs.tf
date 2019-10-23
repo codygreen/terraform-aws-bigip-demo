@@ -22,3 +22,13 @@ output "jumphost_ip" {
   description = "ip address of jump host"
   value       = module.jumphost.public_ip
 }
+
+output "ec2_key_name" {
+  description = "the key used to communication with ec2 instances"
+  value       = var.ec2_key_name
+}
+
+output "bigip_nic_info" {
+  description = "detailed information about the public nics on the bigips "
+  value = data.aws_network_interface.bar
+}
