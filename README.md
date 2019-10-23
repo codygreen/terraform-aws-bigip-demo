@@ -109,6 +109,6 @@ terraform destroy -target bigip_as3.as3-demo1 -target bigip_as3.as3-demo2
 # remove the nginx demo application nodes
 terraform destroy -target module.nginx-demo-app
 # remove the BIG-IP and the underpinning infrastructure
-terraform destroy -target module.vpc -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg -target aws_secretsmanager_secret_version.bigip-pwd
+terraform destroy -target module.vpc -target module.bigip -target module.bigip_sg -target module.bigip_mgmt_sg -target module.demo_app_sg -target aws_secretsmanager_secret_version.bigip-pwd -target random_password.password -target random_id.id -target aws_secretsmanager_secret.bigip
 ```
 
