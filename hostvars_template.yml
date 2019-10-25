@@ -1,17 +1,17 @@
 all:
   vars:
-    app_server_address: "10.1.20.11"
+    app_server_address: "${appserver_guest_ip}"
 
   children:
     servers:
       hosts:
         ${appserver_host_ip}:
           ansible_connection: local
-          app_server_gateway: "10.1.20.1" # TODO find this value
+          app_server_gateway: "${appserver_gateway_ip}" 
 
     big_ips:
       hosts:
-        ${bigip_external_self_ip}:
+        ${bigip_internal_self_ip}:
           bigip_provider:
             server: "{{ inventory_hostname }}"
             user: "${bigip_username}"

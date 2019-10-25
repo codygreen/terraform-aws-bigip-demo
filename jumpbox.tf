@@ -25,11 +25,11 @@ module "jumphost" {
 
   ami                         = data.aws_ami.latest-ubuntu.id
   associate_public_ip_address = true
-  instance_type               = "t2.micro"
+  instance_type               = "t2.large"
   key_name                    = var.ec2_key_name
   monitoring                  = true
   vpc_security_group_ids      = [module.bigip_mgmt_sg.this_security_group_id]
-  subnet_ids                  = module.vpc.public_subnets
+  subnet_ids                  = module.vpc.database_subnets
 
   # this box needs to know the ip address of the bigip and the juicebox host
   # it also needs to know the bigip username and password to use
@@ -54,6 +54,8 @@ resource "null_resource" "transfer" {
             bigip_external_self_ip = data.aws_network_interface.bar[0].private_ip # the ip address that the bigip has on the public subnet
             bigip_internal_self_ip = module.bigip.mgmt_public_ips[0] # the ip address that the bigip has on the private subnet
             appserver_virtual_ip   = cidrhost(cidrsubnet(var.cidr,8,0),125)
+            appserver_gateway_ip   = cidrhost(cidrsubnet(var.cidr,8,20),1)
+            appserver_guest_ip     = cidrhost(cidrsubnet(var.cidr,8,20),10)
             appserver_host_ip      = module.jumphost.private_ip[0]   # the ip address that the jumphost has on the public subnet
           }
     )
