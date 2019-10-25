@@ -15,7 +15,7 @@ You can choose to run this from your workstation or a container. Follow the inst
 # Using a Docker container
 The 8089 port is opened in order to use the gui of the load generating tool
 - install Docker Desktop (https://www.docker.com/products/docker-desktop)
-- docker run -it -p 8089:8089 mmenger/tfdemoenv:1.5.4 /bin/sh
+- docker run -it -p 8089:8089 -v $(pwd):/workspace mmenger/tfdemoenv:1.5.5 /bin/bash
 
 # Required Resource
 This example creates the following resource inside of AWS.  Please ensure your IAM user or IAM Role has privileges to create these objects.
