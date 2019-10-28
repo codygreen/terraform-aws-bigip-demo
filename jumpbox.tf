@@ -27,9 +27,9 @@ module "jumphost" {
   associate_public_ip_address = true
   instance_type               = "t2.large"
   key_name                    = var.ec2_key_name
-  monitoring                  = true
-  vpc_security_group_ids      = [module.bigip_mgmt_sg.this_security_group_id]
-  subnet_ids                  = module.vpc.database_subnets
+  monitoring                  = false
+  vpc_security_group_ids      = [module.jumphost_sg.this_security_group_id]
+  subnet_ids                  = [module.vpc.public_subnets[0]]
 
   # this box needs to know the ip address of the bigip and the juicebox host
   # it also needs to know the bigip username and password to use
@@ -39,6 +39,24 @@ module "jumphost" {
     Environment = "dev"
     Application = var.prefix
   }
+}
+
+#
+# Create a security group for the jumphost
+#
+module "jumphost_sg" {
+  source = "terraform-aws-modules/security-group/aws"
+
+  name        = format("%s-jumphost-%s", var.prefix, random_id.id.hex)
+  description = "Security group for BIG-IP Demo"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_cidr_blocks = [var.allowed_mgmt_cidr]
+  ingress_rules       = ["https-443-tcp", "ssh-tcp"]
+
+  # Allow ec2 instances outbound Internet connectivity
+  egress_cidr_blocks = ["0.0.0.0/0"]
+  egress_rules       = ["all-all"]
 }
 
 resource "null_resource" "transfer" {
@@ -52,10 +70,10 @@ resource "null_resource" "transfer" {
             bigip_username         = "admin"
             bigip_password         = random_password.password.result
             bigip_external_self_ip = data.aws_network_interface.bar[0].private_ip # the ip address that the bigip has on the public subnet
-            bigip_internal_self_ip = module.bigip.mgmt_public_ips[0] # the ip address that the bigip has on the private subnet
-            appserver_virtual_ip   = cidrhost(cidrsubnet(var.cidr,8,0),125)
-            appserver_gateway_ip   = cidrhost(cidrsubnet(var.cidr,8,20),1)
-            appserver_guest_ip     = cidrhost(cidrsubnet(var.cidr,8,20),10)
+            bigip_internal_self_ip = cidrhost(cidrsubnet(var.cidr,8,var.internal_subnet_offset),50) # the ip address that the bigip has on the private subnet
+            appserver_virtual_ip   = cidrhost(cidrsubnet(var.cidr,8,var.external_subnet_offset),125)
+            appserver_gateway_ip   = cidrhost(cidrsubnet(var.cidr,8,var.internal_subnet_offset),1)
+            appserver_guest_ip     = cidrhost(cidrsubnet(var.cidr,8,var.internal_subnet_offset),10)
             appserver_host_ip      = module.jumphost.private_ip[0]   # the ip address that the jumphost has on the public subnet
           }
     )
