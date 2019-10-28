@@ -28,7 +28,7 @@ module "bigip" {
   version = "0.1.2"
 
   prefix = format(
-    "%s-bigip-1-nic_with_new_vpc-%s",
+    "%s-bigip-3-nic_with_new_vpc-%s",
     var.prefix,
     random_id.id.hex
   )
@@ -36,7 +36,7 @@ module "bigip" {
   f5_ami_search_name              = "F5 BIGIP-15.* PAYG-Best 200Mbps*"
   f5_instance_count               = length(var.azs)
   ec2_key_name                    = var.ec2_key_name
-  ec2_instance_type               = "m5.large"
+  ec2_instance_type               = "c4.xlarge"
   
   mgmt_subnet_security_group_ids  = [
     module.bigip_sg.this_security_group_id,
@@ -53,7 +53,6 @@ module "bigip" {
     module.bigip_sg.this_security_group_id,
     module.bigip_mgmt_sg.this_security_group_id
   ]
-
 
 
   vpc_public_subnet_ids  = module.vpc.public_subnets
