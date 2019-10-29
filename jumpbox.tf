@@ -25,7 +25,7 @@ module "jumphost" {
 
   ami                         = data.aws_ami.latest-ubuntu.id
   associate_public_ip_address = true
-  instance_type               = "t2.large"
+  instance_type               = "t2.xlarge"
   key_name                    = var.ec2_key_name
   monitoring                  = false
   vpc_security_group_ids      = [module.jumphost_sg.this_security_group_id]
@@ -75,6 +75,7 @@ resource "null_resource" "transfer" {
             appserver_gateway_ip   = cidrhost(cidrsubnet(var.cidr,8,var.internal_subnet_offset),1)
             appserver_guest_ip     = cidrhost(cidrsubnet(var.cidr,8,var.internal_subnet_offset),10)
             appserver_host_ip      = module.jumphost.private_ip[0]   # the ip address that the jumphost has on the public subnet
+            bigip_dns_server       = "8.8.8.8"
           }
     )
 

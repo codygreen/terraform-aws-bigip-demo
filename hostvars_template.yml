@@ -11,7 +11,7 @@ all:
 
     big_ips:
       hosts:
-        ${bigip_internal_self_ip}:
+        ${bigip_host_ip}:
           bigip_provider:
             server: "{{ inventory_hostname }}"
             user: "${bigip_username}"
@@ -21,8 +21,8 @@ all:
           bigip_hostname: "${bigip_host_dns}"
           bigip_ntp_server: "\"0.pool.ntp.org\", \"1.pool.ntp.org\""
           bigip_ntp_timezone: "America/Los_Angeles"
-          bigip_dns_server: "\"10.1.255.254\"" # find this value
+          bigip_dns_server: "${bigip_dns_server}" # find this value
           bigip_dns_search: "\"{{ bigip_domain }}\""
-          bigip_external_self_ip: "${bigip_external_self_ip}"
-          bigip_internal_self_ip: "${bigip_internal_self_ip}"
+          bigip_external_self_ip: "${bigip_external_self_ip}/24"
+          bigip_internal_self_ip: "${bigip_internal_self_ip}/24"
           app_virtual_address: "${appserver_virtual_ip}"
