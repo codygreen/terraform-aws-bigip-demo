@@ -50,7 +50,7 @@ control "Declarative On-boarding Available" do
               method: 'GET',
               ssl_verify: false).body) do
           its([0,'version']) { should eq '1.8.0' }
-          its([0,'release']) { should eq '3' } # this should be replaced with a test using the json resource
+          its([0,'release']) { should eq '2' } # this should be replaced with a test using the json resource
     end
   end
 end 
