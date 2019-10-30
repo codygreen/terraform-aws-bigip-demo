@@ -24,8 +24,9 @@ resource "aws_secretsmanager_secret_version" "bigip-pwd" {
 # Create the BIG-IP appliances
 #
 module "bigip" {
-  source  = "f5devcentral/bigip/aws"
-  version = "0.1.2"
+  # source  = "f5devcentral/bigip/aws"
+  # version = "0.1.2"
+  source = "github.com/f5devcentral/terraform-aws-bigip?ref=ip-outputs"
 
   prefix = format(
     "%s-bigip-3-nic_with_new_vpc-%s",
@@ -37,6 +38,7 @@ module "bigip" {
   f5_instance_count               = length(var.azs)
   ec2_key_name                    = var.ec2_key_name
   ec2_instance_type               = "c4.xlarge"
+  DO_URL                          = "https://github.com/F5Networks/f5-declarative-onboarding/releases/download/v1.8.0/f5-declarative-onboarding-1.8.0-2.noarch.rpm"
   
   mgmt_subnet_security_group_ids  = [
     module.bigip_sg.this_security_group_id,
