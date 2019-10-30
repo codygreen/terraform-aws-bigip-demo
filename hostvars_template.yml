@@ -1,28 +1,31 @@
 all:
   vars:
-    app_server_address: "10.1.20.11"
+    app_server_address: "${appserver_guest_ip}" # an ip address that will be assigned to a nic created by ansible
 
   children:
     servers:
       hosts:
-        ${appserver_host_ip}:
-          ansible_connection: local
-          app_server_gateway: "10.1.20.1" # TODO find this value
+        ${appserver_guest_ip}:
+          ansible_connection: ssh
+          ansible_user: "${ec2_username}"
+          ansible_become: yes
+          ansible_ssh_private_key_file: "~/${ec2_key_name}.pem"
+          app_server_gateway: "${appserver_gateway_ip}" 
 
     big_ips:
       hosts:
-        ${bigip_external_self_ip}:
+        ${bigip_host_ip}: # the ip address or hostname of the BIG-IP management endpoint
           bigip_provider:
             server: "{{ inventory_hostname }}"
-            user: "${bigip_username}"
-            password: "${bigip_password}"
-          bigip_validate_certs: false
-          bigip_domain: "${bigip_domain}"
-          bigip_hostname: "${bigip_host_dns}"
-          bigip_ntp_server: "\"0.pool.ntp.org\", \"1.pool.ntp.org\""
-          bigip_ntp_timezone: "America/Los_Angeles"
-          bigip_dns_server: "\"10.1.255.254\"" # find this value
-          bigip_dns_search: "\"{{ bigip_domain }}\""
-          bigip_external_self_ip: "${bigip_external_self_ip}"
-          bigip_internal_self_ip: "${bigip_internal_self_ip}"
+            user: "${bigip_username}" # the username that will be used to access the BIG-IP management endpoint
+            password: "${bigip_password}" # the password that will be used to access the BIG-IP management endpoint
+          bigip_validate_certs: false # since these boxes are assumed to have self-signed certs validatation is disabled
+          bigip_domain: "${bigip_domain}" # the domain within which the BIG-IP is hosted
+          bigip_hostname: "${bigip_host_dns}" # the hostname of the BIG-IP
+          bigip_ntp_server: "\"0.pool.ntp.org\", \"1.pool.ntp.org\"" # ntp servers to configure the BIG-IP with
+          bigip_ntp_timezone: "America/Los_Angeles" # the timezone should be reconciled with the AWS region within which the BIG-IP is built
+          bigip_dns_server: "\"${bigip_dns_server}\"" # a list of DNS servers to configure the BIG-IP for name resolution
+          bigip_dns_search: "\"{{ bigip_domain }}\"" # internal DNS search domain
+          bigip_external_self_ip: "${bigip_external_self_ip}/24" # the external 
+          bigip_internal_self_ip: "${bigip_internal_self_ip}/24"
           app_virtual_address: "${appserver_virtual_ip}"
