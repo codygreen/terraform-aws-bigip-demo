@@ -5,4 +5,5 @@ export EC2KEYNAME=`terraform output --json | jq -r '.ec2_key_name.value'`
 export JUMPHOSTIP=`terraform output --json | jq -r '.jumphost_ip.value[0]'`
 echo connect at https://$BIGIPHOST0:$BIGIPMGMTPORT with $BIGIPPASSWORD
 echo connect to jumphost at with
+echo scp -i $EC2KEYNAME.pem $EC2KEYNAME.pem ubuntu@$JUMPHOSTIP:~/$EC2KEYNAME.pem
 echo ssh -i $EC2KEYNAME.pem ubuntu@$JUMPHOSTIP
