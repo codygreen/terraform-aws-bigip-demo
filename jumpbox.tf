@@ -21,7 +21,7 @@ module "jumphost" {
   version = "~> 2.0"
 
   name           = format("%s-demo-jumphost-%s", var.prefix, random_id.id.hex)
-  instance_count = 1
+  instance_count = length(var.azs)
 
   ami                         = data.aws_ami.latest-ubuntu.id
   associate_public_ip_address = true
@@ -29,7 +29,7 @@ module "jumphost" {
   key_name                    = var.ec2_key_name
   monitoring                  = false
   vpc_security_group_ids      = [module.jumphost_sg.this_security_group_id]
-  subnet_ids                  = [module.vpc.public_subnets[0]]
+  subnet_ids                  = module.vpc.public_subnets
 
   # this box needs to know the ip address of the bigip and the juicebox host
   # it also needs to know the bigip username and password to use
@@ -53,28 +53,49 @@ module "jumphost_sg" {
 
   ingress_cidr_blocks = [var.allowed_mgmt_cidr]
   ingress_rules       = ["https-443-tcp", "ssh-tcp"]
+  ingress_with_cidr_blocks = [
+    {
+      from_port   = 3300
+      to_port     = 3300
+      protocol    = "tcp"
+      description = "Juiceshop ports"
+      cidr_blocks = var.allowed_mgmt_cidr
+    },
+     {
+      from_port   = 3000
+      to_port     = 3000
+      protocol    = "tcp"
+      description = "Juiceshop ports"
+      cidr_blocks = var.allowed_mgmt_cidr
+    },
+  ]
 
   # Allow ec2 instances outbound Internet connectivity
   egress_cidr_blocks = ["0.0.0.0/0"]
   egress_rules       = ["all-all"]
 }
-
+#
+# Create and place the inventory.yml file for the ansible demo
+#
 resource "null_resource" "transfer" {
+  count = length(var.azs)
   provisioner "file" {
     content     = templatefile(
       "${path.module}/hostvars_template.yml",
           {
-            bigip_host_ip          = module.bigip.mgmt_public_ips[0] # the ip address that the bigip has on the management subnet
-            bigip_host_dns         = module.bigip.mgmt_public_dns[0] # the DNS name of the bigip on the public subnet
+            bigip_host_ip          = join(",",element(module.bigip.mgmt_addresses,0))#bigip_host_ip          = module.bigip.mgmt_public_ips[count.index]  the ip address that the bigip has on the management subnet
+            bigip_host_dns         = module.bigip.mgmt_public_dns[count.index] # the DNS name of the bigip on the public subnet
             bigip_domain           = "${var.region}.compute.internal"
             bigip_username         = "admin"
             bigip_password         = random_password.password.result
-            bigip_external_self_ip = data.aws_network_interface.bar[0].private_ip # the ip address that the bigip has on the public subnet
-            bigip_internal_self_ip = cidrhost(cidrsubnet(var.cidr,8,var.internal_subnet_offset),50) # the ip address that the bigip has on the private subnet
-            appserver_virtual_ip   = cidrhost(cidrsubnet(var.cidr,8,var.external_subnet_offset),125)
-            appserver_gateway_ip   = cidrhost(cidrsubnet(var.cidr,8,var.internal_subnet_offset),1)
-            appserver_guest_ip     = cidrhost(cidrsubnet(var.cidr,8,var.internal_subnet_offset),10)
-            appserver_host_ip      = module.jumphost.private_ip[0]   # the ip address that the jumphost has on the public subnet
+            ec2_key_name           = var.ec2_key_name
+            ec2_username           = "ubuntu"
+            bigip_external_self_ip = join(",",element(module.bigip.public_addresses,0)) # the ip address that the bigip has on the public subnet
+            bigip_internal_self_ip = join(",",element(module.bigip.private_addresses,0)) # the ip address that the bigip has on the private subnet
+            appserver_virtual_ip   = cidrhost(cidrsubnet(var.cidr,8,count.index + var.external_subnet_offset),125)
+            appserver_gateway_ip   = cidrhost(cidrsubnet(var.cidr,8,count.index + var.internal_subnet_offset),1)
+            appserver_guest_ip     = module.dockerhost.private_ip[count.index]
+            appserver_host_ip      = module.jumphost.private_ip[count.index]   # the ip address that the jumphost has on the public subnet
             bigip_dns_server       = "8.8.8.8"
           }
     )
@@ -85,7 +106,7 @@ resource "null_resource" "transfer" {
       type        = "ssh"
       user        = "ubuntu"
       private_key = file(var.ec2_key_file)
-      host        = module.jumphost.public_ip[0]
+      host        = module.jumphost.public_ip[count.index]
     }  
   }
 }
