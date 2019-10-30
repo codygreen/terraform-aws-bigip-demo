@@ -83,15 +83,15 @@ resource "null_resource" "transfer" {
     content     = templatefile(
       "${path.module}/hostvars_template.yml",
           {
-            bigip_host_ip          = join(",",element(module.bigip.mgmt_addresses,0))#bigip_host_ip          = module.bigip.mgmt_public_ips[count.index]  the ip address that the bigip has on the management subnet
+            bigip_host_ip          = join(",",element(module.bigip.mgmt_addresses,count.index))#bigip_host_ip          = module.bigip.mgmt_public_ips[count.index]  the ip address that the bigip has on the management subnet
             bigip_host_dns         = module.bigip.mgmt_public_dns[count.index] # the DNS name of the bigip on the public subnet
             bigip_domain           = "${var.region}.compute.internal"
             bigip_username         = "admin"
             bigip_password         = random_password.password.result
             ec2_key_name           = var.ec2_key_name
             ec2_username           = "ubuntu"
-            bigip_external_self_ip = join(",",element(module.bigip.public_addresses,0)) # the ip address that the bigip has on the public subnet
-            bigip_internal_self_ip = join(",",element(module.bigip.private_addresses,0)) # the ip address that the bigip has on the private subnet
+            bigip_external_self_ip = join(",",element(module.bigip.public_addresses,count.index)) # the ip address that the bigip has on the public subnet
+            bigip_internal_self_ip = join(",",element(module.bigip.private_addresses,count.index)) # the ip address that the bigip has on the private subnet
             appserver_virtual_ip   = cidrhost(cidrsubnet(var.cidr,8,count.index + var.external_subnet_offset),125)
             appserver_gateway_ip   = cidrhost(cidrsubnet(var.cidr,8,count.index + var.internal_subnet_offset),1)
             appserver_guest_ip     = module.dockerhost.private_ip[count.index]
