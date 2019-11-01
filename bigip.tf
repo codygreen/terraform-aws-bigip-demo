@@ -26,7 +26,7 @@ resource "aws_secretsmanager_secret_version" "bigip-pwd" {
 module "bigip" {
   # source  = "f5devcentral/bigip/aws"
   # version = "0.1.2"
-  source = "github.com/f5devcentral/terraform-aws-bigip?ref=ip-outputs"
+  source = "github.com/f5devcentral/terraform-aws-bigip?ref=multiple-public-ips"
 
   prefix = format(
     "%s-bigip-3-nic_with_new_vpc-%s",
