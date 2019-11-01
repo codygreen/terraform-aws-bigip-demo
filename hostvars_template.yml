@@ -30,3 +30,4 @@ all:
           bigip_internal_self_ip: "${bigip_internal_self_ip}/24"
           juiceshop_virtual_address: "${juiceshop_virtual_ip}"
           grafana_virtual_address: "${grafana_virtual_ip}"
+          log_pool: "${log_pool}"
