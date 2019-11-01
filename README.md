@@ -15,7 +15,7 @@ You can choose to run this from your workstation or a container. Follow the inst
 # Using a Docker container
 The 8089 port is opened in order to use the gui of the load generating tool
 - install Docker Desktop (https://www.docker.com/products/docker-desktop)
-- docker run -it -v $(pwd):/workspace -p 8089:8089 mmenger/tfdemoenv:1.5.5 /bin/bash
+- `docker run -it -v $(pwd):/workspace -p 8089:8089 mmenger/tfdemoenv:1.5.5 /bin/bash`
 
 # Required Resource
 This example creates the following resource inside of AWS.  Please ensure your IAM user or IAM Role has privileges to create these objects.
@@ -50,6 +50,7 @@ enter the following in the *secrets.auto.tfvars* file
 AccessKeyID         = "<AN ACCESS KEY FOR YOUR AWS ACCOUNT>" 
 SecretAccessKey     = "<THE SECRET KEY ASSOCIATED WITH THE AWS ACCESS KEY>" 
 ec2_key_name        = "<THE NAME OF AN AWS KEY PAIR WHICH IS ASSOCIATE WITH THE AWS ACOUNT>"
+ec2_key_file        = "<THE PATH TO AN SSH KEY FILE USED TO CONNECT TO THE UBUNTU SERVER ONCE IT IS CREATED. NOTE: THIS PATH SHOULD BE RELATIVE TO THE CONTAINER ROOT>"
 ```
 save the file and quit vi
 

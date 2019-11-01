@@ -92,7 +92,8 @@ resource "null_resource" "transfer" {
             ec2_username           = "ubuntu"
             bigip_external_self_ip = join(",",element(module.bigip.public_addresses,count.index)) # the ip address that the bigip has on the public subnet
             bigip_internal_self_ip = join(",",element(module.bigip.private_addresses,count.index)) # the ip address that the bigip has on the private subnet
-            appserver_virtual_ip   = cidrhost(cidrsubnet(var.cidr,8,count.index + var.external_subnet_offset),125)
+            juiceshop_virtual_ip   = cidrhost(cidrsubnet(var.cidr,8,count.index + var.external_subnet_offset),125)
+            grafana_virtual_ip     = cidrhost(cidrsubnet(var.cidr,8,count.index + var.external_subnet_offset),126)
             appserver_gateway_ip   = cidrhost(cidrsubnet(var.cidr,8,count.index + var.internal_subnet_offset),1)
             appserver_guest_ip     = module.dockerhost.private_ip[count.index]
             appserver_host_ip      = module.jumphost.private_ip[count.index]   # the ip address that the jumphost has on the public subnet

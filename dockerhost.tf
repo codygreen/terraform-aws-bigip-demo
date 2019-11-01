@@ -24,6 +24,12 @@ module "dockerhost" {
   ami                         = data.aws_ami.latest-ubuntu-docker.id
   associate_public_ip_address = false
   instance_type               = "t2.xlarge"
+  root_block_device = [
+      {
+        volume_type = "gp2"
+        volume_size = 100
+      },
+    ]
   key_name                    = var.ec2_key_name
   monitoring                  = false
   vpc_security_group_ids      = [module.dockerhost_sg.this_security_group_id]
