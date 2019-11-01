@@ -19,7 +19,7 @@ all:
             server: "{{ inventory_hostname }}"
             user: "${bigip_username}" # the username that will be used to access the BIG-IP management endpoint
             password: "${bigip_password}" # the password that will be used to access the BIG-IP management endpoint
-          bigip_validate_certs: false # since these boxes are assumed to have self-signed certs validatation is disabled
+            validate_certs: false # since these boxes are assumed to have self-signed certs validatation is disabled
           bigip_domain: "${bigip_domain}" # the domain within which the BIG-IP is hosted
           bigip_hostname: "${bigip_host_dns}" # the hostname of the BIG-IP
           bigip_ntp_server: "\"0.pool.ntp.org\", \"1.pool.ntp.org\"" # ntp servers to configure the BIG-IP with
@@ -28,4 +28,5 @@ all:
           bigip_dns_search: "\"{{ bigip_domain }}\"" # internal DNS search domain
           bigip_external_self_ip: "${bigip_external_self_ip}/24" # the external 
           bigip_internal_self_ip: "${bigip_internal_self_ip}/24"
-          app_virtual_address: "${appserver_virtual_ip}"
+          juiceshop_virtual_address: "${juiceshop_virtual_ip}"
+          grafana_virtual_address: "${grafana_virtual_ip}"

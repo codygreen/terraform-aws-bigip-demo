@@ -30,7 +30,7 @@ control "Connectivity" do
   end
 end 
 
-control "Declarative On-boarding Available" do
+control "Declarative Onboarding Available" do
   impact 1.0
   title "BIGIP has DO"
 
