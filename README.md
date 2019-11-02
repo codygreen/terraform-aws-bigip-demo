@@ -40,6 +40,13 @@ The url embedded within the error message will load the appropriate location in 
 After subscribing, re-run the ```terraform apply``` and the error should not occur again.
 
 # Access Credentials
+Before starting create the user credentials and key pair you'll use to execute this demo
+
+- [Create an IAM account in AWS](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html)
+- [How to Create an AWS Key Pair](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair)
+
+Securely store the .pem file for later use. You will not need it explicitly for this demo. You will need the Access Key, Secret Key, and Key Pair name for the following steps. 
+
 ```bash
 #starting from the directory where you cloned this repository
 cd terraform-aws-bigip-demo
@@ -53,6 +60,10 @@ ec2_key_name        = "<THE NAME OF AN AWS KEY PAIR WHICH IS ASSOCIATE WITH THE 
 ```
 save the file and quit vi
 
+[Create an IAM account in AWS](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html)
+
+[How to Create an AWS Key Pair](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair)
+
 # Setup
 You will need to build the demo out in stages. 
 ```hcl
@@ -64,6 +75,7 @@ terraform apply -target module.vpc -target module.nginx-demo-app -target module.
 In between the intial commands and the final command,  you will need to wait as the BIG-IPs complete configuration. Once you are able to log into the BIG-IPs using the generated password you can proceed to the next command.
 
 ```
+# found in ./runtests.sh
 # check the status of the BIG-IPs
 terraform output --json > inspec/bigip-ready/files/terraform.json
 inspec exec inspec/bigip-ready
@@ -76,10 +88,11 @@ If terraform returns an error, rerun ```terraform apply```.
 
 # log into the BIG-IP
 ```
+# found in ./findthehosts.sh
 # find the connection info for the BIG-IP
-export BIGIPHOST0=`terraform output --json | jq '.bigip_mgmt_public_ips.value[0]' | sed 's/"//g'`
-export BIGIPMGMTPORT=`terraform output --json | jq '.bigip_mgmt_port.value' | sed 's/"//g'`
-export BIGIPPASSWORD=`terraform output --json | jq '.bigip_password.value' | sed 's/"//g'`
+export BIGIPHOST0=`terraform output --json | jq n-r '.bigip_mgmt_public_ips.value[0]'`
+export BIGIPMGMTPORT=`terraform output --json | jq -r '.bigip_mgmt_port.value'`
+export BIGIPPASSWORD=`terraform output --json | jq -r '.bigip_password.value'`
 echo connect at https://$BIGIPHOST0:$BIGIPMGMTPORT
 ```
 connect to the BIGIP at https://<bigip_mgmt_public_ips>:<bigip_mgmt_port>
@@ -90,8 +103,9 @@ connect to the web application at http://<bigip_mgmt_public_ips>
 
 # Creating Load
 ```
+# found in ./runlocust.sh
 # find the ip address of the created BIG-IP 
-export BIGIPHOST0=`terraform output --json | jq '.bigip_mgmt_public_ips.value[0]' | sed 's/"//g'`
+export BIGIPHOST0=`terraform output --json | jq -r '.bigip_mgmt_public_ips.value[0]'`
 # start the locust instance 
 cd locust
 locust --host=http://$BIGIPHOST0
