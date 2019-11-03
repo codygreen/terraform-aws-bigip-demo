@@ -1,4 +1,4 @@
-# Demo deployment of a BIG-IP using Terraform
+# Demo deployment of BIG-IPs using Terraform
 Demo deployment of F5 BIG-IP in AWS using Terraform
 
 an authentication token must be generated and recorded as documented below in order to access the modules required by this demo
@@ -13,12 +13,12 @@ You can choose to run this from your workstation or a container. Follow the inst
 - install jq https://stedolan.github.io/jq/download/
 
 # Using a Docker container
-The 8089 port is opened in order to use the gui of the load generating tool
+The port 8089 is opened in order to use the gui of the locust load generating tool should you choose to use it.
 - install Docker Desktop (https://www.docker.com/products/docker-desktop)
 - `docker run -it -v $(pwd):/workspace -p 8089:8089 mmenger/tfdemoenv:1.6.2 /bin/bash`
 
 # Required Resource
-This example creates the following resource inside of AWS.  Please ensure your IAM user or IAM Role has privileges to create these objects.
+This example creates the following resources inside of AWS.  Please ensure your IAM user or IAM Role has privileges to create these objects.
 
 **Note:** This example requires 4 Elastic IPs, please ensure your EIP limit on your account can accommodate this (information on ElasticIP limits can be found at https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html#limits_ec2)
  - AWS VPC
@@ -41,8 +41,7 @@ After subscribing, re-run the ```terraform apply``` and the error should not occ
 
 # Access Credentials
 ```bash
-#starting from the directory where you cloned this repository
-cd terraform-aws-bigip-demo
+#starting from within the clone of this repository
 vi secrets.auto.tfvars
 ```
 enter the following in the *secrets.auto.tfvars* file
