@@ -32,3 +32,11 @@ output "bigip_nic_info" {
   description = "detailed information about the public nics on the bigips "
   value = data.aws_network_interface.bar
 }
+
+output "juiceshop_ip" {
+  value = aws_eip.juiceshop[*].public_ip
+}
+
+output "grafana_ip" {
+  value = aws_eip.grafana[*].public_ip
+}
