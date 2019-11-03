@@ -10,7 +10,7 @@ export JUICESHOP1=`terraform output --json | jq -r '.juiceshop_ip.value[1]'`
 export GRAFANA0=`terraform output --json | jq -r '.grafana_ip.value[0]'`
 export GRAFANA1=`terraform output --json | jq -r '.grafana_ip.value[1]'`
 echo '** AVAILABILITY ZONE 1 **'
-echo connect to BIG=-IP at https://$BIGIPHOST0:$BIGIPMGMTPORT with $BIGIPPASSWORD
+echo connect to BIG-IP at https://$BIGIPHOST0:$BIGIPMGMTPORT with $BIGIPPASSWORD
 echo connect to jumphost at with
 echo scp -i $EC2KEYNAME.pem $EC2KEYNAME.pem ubuntu@$JUMPHOSTIP0:~/$EC2KEYNAME.pem
 echo ssh -i $EC2KEYNAME.pem ubuntu@$JUMPHOSTIP0
