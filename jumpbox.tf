@@ -91,10 +91,10 @@ resource "null_resource" "transfer" {
             ec2_key_name           = var.ec2_key_name
             ec2_username           = "ubuntu"
             log_pool               = cidrhost(cidrsubnet(var.cidr,8,count.index + var.internal_subnet_offset),250)
-            bigip_external_self_ip = element(flatten(module.bigip.public_addresses[count.index]),0) # the ip address that the bigip has on the public subnet
+            bigip_external_self_ip = element(flatten(data.aws_network_interface.bar[count.index].private_ips),0) # the ip address that the bigip has on the public subnet
             bigip_internal_self_ip = join(",",element(module.bigip.private_addresses,count.index)) # the ip address that the bigip has on the private subnet
-            juiceshop_virtual_ip   = element(flatten(module.bigip.public_addresses[count.index]),1)
-            grafana_virtual_ip     = element(flatten(module.bigip.public_addresses[count.index]),2)
+            juiceshop_virtual_ip   = element(flatten(data.aws_network_interface.bar[count.index].private_ips),1)
+            grafana_virtual_ip     = element(flatten(data.aws_network_interface.bar[count.index].private_ips),2)
             appserver_gateway_ip   = cidrhost(cidrsubnet(var.cidr,8,count.index + var.internal_subnet_offset),1)
             appserver_guest_ip     = module.dockerhost.private_ip[count.index]
             appserver_host_ip      = module.jumphost.private_ip[count.index]   # the ip address that the jumphost has on the public subnet
@@ -111,4 +111,20 @@ resource "null_resource" "transfer" {
       host        = module.jumphost.public_ip[count.index]
     }  
   }
+}
+
+
+
+resource "aws_eip" "juiceshop" {
+  count                     = length(var.azs)
+  vpc                       = true
+  network_interface         = "${data.aws_network_interface.bar[count.index].id}"
+  associate_with_private_ip = element(flatten(data.aws_network_interface.bar[count.index].private_ips),1)
+}
+
+resource "aws_eip" "grafana" {
+  count                     = length(var.azs)
+  vpc                       = true
+  network_interface         = "${data.aws_network_interface.bar[count.index].id}"
+  associate_with_private_ip = element(flatten(data.aws_network_interface.bar[count.index].private_ips),2)
 }
