@@ -1,4 +1,4 @@
-# Demo deployment of a BIG-IP and NGINX webapp using Terraform
+# Demo deployment of BIG-IPs using Terraform
 Demo deployment of F5 BIG-IP in AWS using Terraform
 
 an authentication token must be generated and recorded as documented below in order to access the modules required by this demo
@@ -13,12 +13,12 @@ You can choose to run this from your workstation or a container. Follow the inst
 - install jq https://stedolan.github.io/jq/download/
 
 # Using a Docker container
-The 8089 port is opened in order to use the gui of the load generating tool
+The port 8089 is opened in order to use the gui of the locust load generating tool should you choose to use it.
 - install Docker Desktop (https://www.docker.com/products/docker-desktop)
 - `docker run -it -v $(pwd):/workspace -p 8089:8089 mmenger/tfdemoenv:1.6.2 /bin/bash`
 
 # Required Resource
-This example creates the following resource inside of AWS.  Please ensure your IAM user or IAM Role has privileges to create these objects.
+This example creates the following resources inside of AWS.  Please ensure your IAM user or IAM Role has privileges to create these objects.
 
 **Note:** This example requires 4 Elastic IPs, please ensure your EIP limit on your account can accommodate this (information on ElasticIP limits can be found at https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html#limits_ec2)
  - AWS VPC
@@ -41,8 +41,7 @@ After subscribing, re-run the ```terraform apply``` and the error should not occ
 
 # Access Credentials
 ```bash
-#starting from the directory where you cloned this repository
-cd terraform-aws-bigip-demo
+#starting from within the clone of this repository
 vi secrets.auto.tfvars
 ```
 enter the following in the *secrets.auto.tfvars* file
@@ -58,44 +57,38 @@ save the file and quit vi
 ```hcl
 # initialize Terraform
 terraform init
-# build the NGINX nodes, the BIG-IPS, and the underpinning infrastructure
+# build the BIG-IPS and the underpinning infrastructure
 terraform apply 
 ```
-Before proceeding you will need to wait as the BIG-IPs complete configuration. Once you are able to log into the BIG-IPs using the generated password you can proceed to the next command. The following Inspec tests validate the connectivity of the BIG-IP and the availability of the management API end point.
+Depending upon how you intend to use the environment you may need to wait after Terraform is complete. The configuration of the  BIG-IPs is completed asynchoronously. If you need the BIG-IPs to be fully configured before proceeding, the following Inspec tests validate the connectivity of the BIG-IP and the availability of the management API end point.
 
 ```
 # check the status of the BIG-IPs
+# these steps can also be performed using ./runtests.sh
+#
 terraform output --json > inspec/bigip-ready/files/terraform.json
 inspec exec inspec/bigip-ready
 ```
-once the tests all pass the BIG-IP is ready
+once the tests all pass the BIG-IPs are ready
 
 If terraform returns an error, rerun ```terraform apply```.
 
-# log into the BIG-IP
+# Log into the BIG-IP
 ```
+#
 # find the connection info for the BIG-IP
+# these steps can also be performed by using ./findthehosts.sh
+#
 export BIGIPHOST0=`terraform output --json | jq -r '.bigip_mgmt_public_ips.value[0]'`
 export BIGIPMGMTPORT=`terraform output --json | jq -r '.bigip_mgmt_port.value'`
 export BIGIPPASSWORD=`terraform output --json | jq -r '.bigip_password.value'`
 export JUMPHOSTIP=`terraform output --json | jq -r '.jumphost_ip.value[0]'`
 echo connect at https://$BIGIPHOST0:$BIGIPMGMTPORT with $BIGIPPASSWORD
 echo connect to jumphost at with
-echo ssh -i "tfdemo.pem" ubuntu@$JUMPHOSTIP
+echo ssh -i "<THE AWS KEY YOU IDENTIFIED ABOVE>" ubuntu@$JUMPHOSTIP
 ```
 connect to the BIGIP at https://<bigip_mgmt_public_ips>:<bigip_mgmt_port>
 login as user:admin and password: <bigip_password>
-
-# Creating Load
-```
-# find the ip address of the created BIG-IP 
-export BIGIPHOST0=`terraform output --json | jq -r '.bigip_mgmt_public_ips.value[0]'`
-# start the locust instance 
-cd locust
-locust --host=http://$BIGIPHOST0
-```
-Go to the url created by locust to use the load generation gui.
-Press ctrl-C when you are done with the load generation.
 
 # Teardown
 When you are done using the demo environment you will need to decommission it
