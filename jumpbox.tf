@@ -120,6 +120,9 @@ resource "aws_eip" "juiceshop" {
   vpc                       = true
   network_interface         = "${data.aws_network_interface.bar[count.index].id}"
   associate_with_private_ip = element(flatten(data.aws_network_interface.bar[count.index].private_ips),1)
+  tags = {
+    Name = format("%s-juiceshop-eip-%s%s", var.prefix, random_id.id.hex,count.index)
+  }
 }
 
 resource "aws_eip" "grafana" {
@@ -127,4 +130,8 @@ resource "aws_eip" "grafana" {
   vpc                       = true
   network_interface         = "${data.aws_network_interface.bar[count.index].id}"
   associate_with_private_ip = element(flatten(data.aws_network_interface.bar[count.index].private_ips),2)
+  tags = {
+    Name = format("%s-grafana-eip-%s%s", var.prefix, random_id.id.hex,count.index)
+  }
+
 }
