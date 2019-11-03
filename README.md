@@ -1,4 +1,4 @@
-# Demo deployment of a BIG-IP and NGINX webapp using Terraform
+# Demo deployment of a BIG-IP using Terraform
 Demo deployment of F5 BIG-IP in AWS using Terraform
 
 an authentication token must be generated and recorded as documented below in order to access the modules required by this demo
@@ -74,7 +74,7 @@ once the tests all pass the BIG-IPs are ready
 
 If terraform returns an error, rerun ```terraform apply```.
 
-# log into the BIG-IP
+# Log into the BIG-IP
 ```
 #
 # find the connection info for the BIG-IP
