@@ -1,22 +1,23 @@
 all:
   vars:
-    app_server_address: "${appserver_guest_ip}" # an ip address that will be assigned to a nic created by ansible
+    app_server_address: "${appserver_guest_ip}" # an address that is assigned to the juice shop and grafana virtual server pool members. If the add_ubuntu_interface variable is set to true, this address will also be assigned to the eth1 interface of the Ubuntu server
 
   children:
     servers:
       hosts:
         ${appserver_guest_ip}:
-          ansible_connection: ssh
-          ansible_user: "${ec2_username}"
-          ansible_become: yes
-          ansible_ssh_private_key_file: "~/${ec2_key_name}.pem"
+          ansible_connection: ssh # connection type used when connecting to the Ubuntu host
+          ansible_user: "${ec2_username}" # user name with which to login to the Ubuntu server via ssh
+          ansible_become: true # determines if privilege escalation is used while issuing Ansible tasks on the Ubuntu server
+          ansible_ssh_private_key_file: "~/${ec2_key_name}.pem" # path to private key file to use for ssh authentication
+          add_ubuntu_interface: false # boolean to add an optional network interface (eth1) to the Ubuntu server using the NetPlan role
           app_server_gateway: "${appserver_gateway_ip}" 
 
     big_ips:
       hosts:
         ${bigip_host_ip}: # the ip address or hostname of the BIG-IP management endpoint
           bigip_provider:
-            server: "{{ inventory_hostname }}"
+            server: "{{ inventory_hostname }}" # the ip address or hostname of the BIG-IP management endpoint. defaults to inventory_hostname
             user: "${bigip_username}" # the username that will be used to access the BIG-IP management endpoint
             password: "${bigip_password}" # the password that will be used to access the BIG-IP management endpoint
             validate_certs: false # since these boxes are assumed to have self-signed certs validatation is disabled
@@ -26,8 +27,8 @@ all:
           bigip_ntp_timezone: "America/Los_Angeles" # the timezone should be reconciled with the AWS region within which the BIG-IP is built
           bigip_dns_server: "\"${bigip_dns_server}\"" # a list of DNS servers to configure the BIG-IP for name resolution
           bigip_dns_search: "\"{{ bigip_domain }}\"" # internal DNS search domain
-          bigip_external_self_ip: "${bigip_external_self_ip}/24" # the external 
-          bigip_internal_self_ip: "${bigip_internal_self_ip}/24"
-          juiceshop_virtual_address: "${juiceshop_virtual_ip}"
-          grafana_virtual_address: "${grafana_virtual_ip}"
-          log_pool: "${log_pool}"
+          bigip_external_self_ip: "${bigip_external_self_ip}/24" # the ip address of the BIG-IP's self-ip on the external subnet
+          bigip_internal_self_ip: "${bigip_internal_self_ip}/24" # the ip address of the BIG-IP's self-ip on the internal subnet
+          juiceshop_virtual_address: "${juiceshop_virtual_ip}" # the ip address that will become the listener (virtual server) of the juice shop application
+          grafana_virtual_address: "${grafana_virtual_ip}" # the ip address that will become the listener (virtual server) of the grafana application
+          log_pool: "${log_pool}" # the ip address of the virtual server and looging pool that the LTM Request Policy and ASM Logs can target
